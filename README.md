@@ -2,22 +2,23 @@
 
 **Author / Maintainer:** [@defsecapp](https://github.com/defsecapp)
 
-**SqlServerSecurityAudit** is a Windows console tool that helps security engineers and developers **discover risky SQL Server access surfaces** by:
+**SqlServerSecurityAudit** is a Windows console tool that helps security engineers and developers **discover risky SQL Server security and access surfaces** by:
 
 - scanning application configuration files for SQL Server connection strings and password-like attributes;
-- actively connecting to SQL Server (optional) and checking command execution surfaces such as `xp_cmdshell`, OLE Automation, external scripts, SQL Agent CmdExec, and linked servers;
+- actively connecting to SQL Server (optional) and checking security-relevant command execution surfaces such as `xp_cmdshell`, OLE Automation, external scripts, SQL Agent CmdExec, and linked servers;
 - detecting **password reuse** between SQL logins and **local administrator accounts**;
 - producing a **text report** summarizing findings in a human-readable format.
 
-The tool is written in C# / .NET (target: .NET Framework 4.8) and is designed as a defensive AppSec utility.
+The tool is written in C# / .NET (target: .NET Framework 4.8) and is designed as a defensive security / AppSec utility.
+
 
 ---
 
-## Features
+## Sql Server Security Audit Tool Features
 
 ### File scanning
 
-- Recursively scans directory roots (or all suitable drives, if no root is specified).
+- Recursively scans directory roots (or all suitable drives, if no root is specified) as the first step of the security audit.
 - Looks for common .NET / web configuration files:
   - `web.config`
   - `app.config`
@@ -31,7 +32,7 @@ The tool is written in C# / .NET (target: .NET Framework 4.8) and is designed as
 
 ### Connection string grouping & active SQL checks
 
-- Groups connection strings by **(server, login)** to reduce the number of SQL connections.
+- Groups connection strings by **(server, login)** to reduce the number of SQL connections during the audit.
 - For each distinct (server, login) pair (if active checks are enabled), the tool:
   - connects to SQL Server using `SqlConnection`;
   - records `SYSTEM_USER` and `ORIGINAL_LOGIN()` for effective identity;
@@ -41,7 +42,7 @@ The tool is written in C# / .NET (target: .NET Framework 4.8) and is designed as
 
 ### Command execution surfaces in SQL Server
 
-For each successful connection, the tool checks a set of potential **command execution surfaces**:
+For each successful connection, the tool checks a set of potential **command execution surfaces** as part of the SQL Server security audit:
 
 - **Configuration flags** from `sys.configurations`:
   - `xp_cmdshell`
@@ -70,6 +71,7 @@ For each successful connection, the tool checks a set of potential **command exe
   - counts linked servers with `is_linked = 1` and `is_rpc_out_enabled = 1`.
 
 All temporary changes to configuration (`xp_cmdshell`, `Ole Automation Procedures`, `show advanced options`) are reverted to original values when possible.
+
 
 ### SQL Server service account analysis
 
